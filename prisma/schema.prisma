@@ -1,0 +1,51 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Navigation {
+  id            Int      @id @default(autoincrement())
+  title         String
+  slug          String   @unique
+  lastScrapedAt DateTime?
+
+  categories Category[]
+
+}
+
+model Category {
+  id            Int      @id @default(autoincrement())
+  title         String
+  slug          String
+  navigationId  Int
+  navigation    Navigation @relation(fields: [navigationId], references: [id])
+  products      Product[]
+  lastScrapedAt DateTime?
+
+  @@unique([slug, navigationId])
+}
+model Product {
+  id            Int      @id @default(autoincrement())
+  sourceId      String   @unique
+  title         String
+  price         Float
+  currency      String
+  imageUrl      String?
+  sourceUrl     String
+  categoryId    Int
+  category      Category @relation(fields: [categoryId], references: [id])
+  detail        ProductDetail?
+  lastScrapedAt DateTime?
+}
+
+model ProductDetail {
+  productId    Int   @id
+  product      Product @relation(fields: [productId], references: [id])
+  description  String?
+  ratingsAvg   Float?
+  reviewsCount Int?
+}
